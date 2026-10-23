@@ -1,0 +1,13 @@
+@"
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# Build output
+bin/
+obj/
+
+# Test results
+TestResults/
+"@ | Out-File -FilePath .gitignore -Encoding utf8
