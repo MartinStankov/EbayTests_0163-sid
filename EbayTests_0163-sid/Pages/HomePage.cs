@@ -15,10 +15,28 @@ namespace EbayTests_0163_sid.Pages
         {
         }
 
+        //public HomePage NavigateTo()
+        //{
+        //    Driver.Navigate().GoToUrl(PageURL);
+        //    Wait.Until(d => ((IJavaScriptExecutor)d).ExecuteScript("return document.readyState")?.ToString() == "complete");
+        //    return this;
+        //}
+
         public HomePage NavigateTo()
         {
             Driver.Navigate().GoToUrl(PageURL);
-            Wait.Until(d => ((IJavaScriptExecutor)d).ExecuteScript("return document.readyState")?.ToString() == "complete");
+            Wait.Until(d => ((IJavaScriptExecutor)d)
+                .ExecuteScript("return document.readyState")?.ToString() == "complete");
+
+            // retry once if temporary eBay error page appears
+            if (Driver.Title.Contains("Error Page", StringComparison.OrdinalIgnoreCase) ||
+                Driver.PageSource.Contains("Something went wrong on our end", StringComparison.OrdinalIgnoreCase))
+            {
+                Driver.Navigate().Refresh();
+                Wait.Until(d => ((IJavaScriptExecutor)d)
+                    .ExecuteScript("return document.readyState")?.ToString() == "complete");
+            }
+
             return this;
         }
 
@@ -27,11 +45,12 @@ namespace EbayTests_0163_sid.Pages
             try
             {
                 var logo = WaitForElement(_ebayLogo);
-                return logo != null && logo.Displayed && Driver.Url.ToLower().Contains("ebay.com");
+                return logo != null && logo.Displayed && Driver.Url.Contains("ebay.com", StringComparison.OrdinalIgnoreCase);
             }
             catch (WebDriverTimeoutException)
             {
-                return Driver.Title.ToLower().Contains("ebay") && Driver.Url.ToLower().Contains("ebay.com");
+                return Driver.Title.Contains("ebay", StringComparison.OrdinalIgnoreCase)
+                    && Driver.Url.Contains("ebay.com", StringComparison.OrdinalIgnoreCase);
             }
         }
 

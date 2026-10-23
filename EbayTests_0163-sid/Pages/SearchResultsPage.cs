@@ -25,13 +25,29 @@ namespace EbayTests_0163_sid.Pages
                 // Verify shipping text on the left/filter area by text content
                 return Wait.Until(d =>
                 {
-                    var candidates = d.FindElements(By.XPath(
-                        "//*[contains(normalize-space(.), 'Shipping to')]"));
 
-                    return candidates.Any(e =>
-                        e.Displayed &&
-                        e.Text.Contains("Shipping to", StringComparison.OrdinalIgnoreCase) &&
-                        e.Text.Contains(countryCode, StringComparison.OrdinalIgnoreCase));
+                    var viewportWidth = d.Manage().Window.Size.Width;
+                    var candidates = d.FindElements(By.XPath("//*[contains(normalize-space(.), 'Shipping to')]"));
+
+                    foreach (var element in candidates)
+                    {
+                        if (!element.Displayed)
+                        {
+                            continue;
+                        }
+
+                        // strict "left side" check
+                        var isLeftSide = element.Location.X < (viewportWidth * 0.5);
+                        var hasText = element.Text.Contains("Shipping to", StringComparison.OrdinalIgnoreCase)
+                                      && element.Text.Contains(countryCode, StringComparison.OrdinalIgnoreCase);
+
+                        if (isLeftSide && hasText)
+                        {
+                            return true;
+                        }
+                    }
+
+                    return false;
                 });
             }
             catch (WebDriverTimeoutException)
